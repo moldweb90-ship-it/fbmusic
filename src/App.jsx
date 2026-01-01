@@ -565,7 +565,12 @@ const FlowerBoxLanding = () => {
       <nav className="fixed top-0 w-full z-40 bg-black/95 border-b border-gray-800 backdrop-blur-md rounded-b-[2rem]">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           {/* LOGO */}
-          <div className="flex flex-col">
+          <button
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="flex flex-col cursor-pointer hover:opacity-80 transition-opacity text-left"
+          >
             <div className="font-header text-2xl tracking-wider text-white leading-none">
               FLOWER <span className="text-brand neon-text">BOX</span>
             </div>
@@ -573,7 +578,7 @@ const FlowerBoxLanding = () => {
                <span className="text-[10px] tracking-[0.2em] text-gray-400 uppercase font-bold">{currentT.brandSub}</span>
                <span className="w-2 h-2 bg-brand rounded-full animate-pulse shadow-[0_0_10px_#D81B60]"></span>
             </div>
-          </div>
+          </button>
 
           <div className="flex items-center gap-4">
              {/* LANGUAGE SWITCHER */}
