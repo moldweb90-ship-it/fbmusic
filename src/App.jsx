@@ -13,8 +13,10 @@ const FlowerBoxLanding = () => {
   const [currentReview, setCurrentReview] = useState(0); // For reviews carousel
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [equalizerHeights, setEqualizerHeights] = useState({}); // For animated equalizer bars
   const pushkinAudioRef = useRef(null); // Audio ref for Pushkin section
   const magicAudioRef = useRef(null); // Audio ref for Magic section
+  const portfolioAudioRef = useRef(null); // Audio ref for portfolio tracks
 
   // Detect scroll for floating button appearance
   useEffect(() => {
@@ -95,6 +97,77 @@ const FlowerBoxLanding = () => {
     }
   }, [isMagicPlaying]);
 
+  // Track files mapping (files don't depend on lang)
+  const trackFiles = {
+    1: "/music/portfolio/Любовь на расстоянии.mp3",
+    2: "/music/portfolio/Дерзкий бит на ДР Брату.mp3",
+    3: "/music/portfolio/Iartă-mă.mp3",
+    4: "/music/portfolio/Поздравление Боссу.mp3",
+    5: "/music/portfolio/Гимн Любви (Свадьба).mp3",
+    6: "/music/portfolio/Стих Маме с любовью.mp3",
+    7: "/music/portfolio/Дисс на Бывшего.mp3",
+    8: "/music/portfolio/Утренний Вайб для Нее.mp3",
+  };
+
+  // Initialize portfolio audio and handle playback
+  useEffect(() => {
+    if (isPlaying !== null) {
+      const trackFile = trackFiles[isPlaying];
+      if (!trackFile) return;
+
+      // Stop other audio sources
+      if (pushkinAudioRef.current) pushkinAudioRef.current.pause();
+      if (magicAudioRef.current) magicAudioRef.current.pause();
+
+      // Clean up previous audio if exists
+      if (portfolioAudioRef.current) {
+        portfolioAudioRef.current.pause();
+        portfolioAudioRef.current = null;
+      }
+
+      // Create and play new audio
+      portfolioAudioRef.current = new Audio(trackFile);
+      portfolioAudioRef.current.preload = 'auto';
+      
+      const handleEnded = () => {
+        setIsPlaying(null);
+        setEqualizerHeights({});
+        portfolioAudioRef.current = null;
+      };
+
+      portfolioAudioRef.current.addEventListener('ended', handleEnded);
+      portfolioAudioRef.current.play().catch(error => {
+        console.error('Error playing portfolio audio:', error);
+      });
+
+      // Animate equalizer bars
+      const interval = setInterval(() => {
+        if (portfolioAudioRef.current && !portfolioAudioRef.current.paused) {
+          setEqualizerHeights(prev => ({
+            ...prev,
+            [isPlaying]: Array.from({ length: 12 }, () => Math.random() * 70 + 30)
+          }));
+        }
+      }, 150);
+
+      return () => {
+        clearInterval(interval);
+        if (portfolioAudioRef.current) {
+          portfolioAudioRef.current.removeEventListener('ended', handleEnded);
+          portfolioAudioRef.current.pause();
+          portfolioAudioRef.current = null;
+        }
+      };
+    } else {
+      // Stop audio when isPlaying is null
+      setEqualizerHeights({});
+      if (portfolioAudioRef.current) {
+        portfolioAudioRef.current.pause();
+        portfolioAudioRef.current = null;
+      }
+    }
+  }, [isPlaying]);
+
   
   const [formData, setFormData] = useState({
     type: 'song',
@@ -138,6 +211,7 @@ const FlowerBoxLanding = () => {
       heroTitle2: "ОТКРЫТКИ",
       heroDesc: <>Дари эмоции, а не картон. Персональный <span className="text-white font-bold">ТРЕК</span> или <span className="text-white font-bold">СТИХ</span> к букету. <br/> Цены от <span className="text-white font-bold bg-brand px-3 py-1 rounded-full neon-box">500 MDL</span>.</>,
       btnMain: "ЗАКАЗАТЬ ВАЙБ",
+      btnExamples: "СЛУШАТЬ ПРИМЕРЫ",
       readyTime: "Готовность 1-2 часа",
       marquee: "FLOWER BOX • МУЗЫКА И СТИХИ • ТЕКСТ ПИШЕМ МЫ • КИШИНЕВ • БУКЕТ + АУДИО = РАЗРЫВ СЕРДЕЧКА •",
       scanTitle: "SCAN & LISTEN",
@@ -218,6 +292,7 @@ const FlowerBoxLanding = () => {
       heroTitle2: "FELICITĂRI",
       heroDesc: <>Dăruiește emoții, nu carton. <span className="text-white font-bold">PIESĂ</span> sau <span className="text-white font-bold">POEZIE</span> personalizată la buchet. <br/> Prețuri de la <span className="text-white font-bold bg-brand px-3 py-1 rounded-full neon-box">500 MDL</span>.</>,
       btnMain: "COMANDĂ VIBE",
+      btnExamples: "ASCULTĂ EXEMPLE",
       readyTime: "Gata în 1-2 ore",
       marquee: "FLOWER BOX • MUZICĂ ȘI POEZIE • TEXTUL ÎL SCRIEM NOI • CHIȘINĂU • BUCHET + AUDIO = WOW EFFECT •",
       scanTitle: "SCAN & LISTEN",
@@ -354,6 +429,12 @@ const FlowerBoxLanding = () => {
   // Logic
   const togglePlay = (id) => {
     if (isPlaying === id) {
+      // Stop current track
+      if (portfolioAudioRef.current) {
+        portfolioAudioRef.current.pause();
+        portfolioAudioRef.current = null;
+      }
+      setEqualizerHeights({});
       setIsPlaying(null);
     } else {
       // Stop all other audio when starting a track
@@ -435,14 +516,14 @@ const FlowerBoxLanding = () => {
   };
 
   const tracks = [
-    { id: 1, title: lang === 'ru' ? "Стих: Любовь на расстоянии" : "Poezie: Dragoste la distanță", tag: "POETRY / PIANO", duration: "1:15" },
-    { id: 2, title: lang === 'ru' ? "Дерзкий бит на ДР Брату" : "Beat pentru Frate (La mulți ani)", tag: "TRAP/HIP-HOP", duration: "1:20" },
-    { id: 3, title: lang === 'ru' ? "Стих: Прости меня" : "Poezie: Iartă-mă", tag: "POETRY / VIOLIN", duration: "2:00" },
-    { id: 4, title: lang === 'ru' ? "Поздравление Боссу" : "Felicitare pentru Șef", tag: "JAZZ / LOUNGE", duration: "1:00" },
-    { id: 5, title: lang === 'ru' ? "Гимн Любви (Свадьба)" : "Imnul Iubirii (Nuntă)", tag: "POP BALLAD", duration: "2:30" },
-    { id: 6, title: lang === 'ru' ? "Стих: Маме с любовью" : "Poezie: Pentru Mama", tag: "POETRY / ACOUSTIC", duration: "1:45" },
-    { id: 7, title: lang === 'ru' ? "Дисс на Бывшего" : "Diss pentru Ex", tag: "DRILL / PHONK", duration: "1:40" },
-    { id: 8, title: lang === 'ru' ? "Утренний Вайб для Нее" : "Vibe de dimineață", tag: "LO-FI / CHILL", duration: "2:00" },
+    { id: 1, title: lang === 'ru' ? "Стих: Любовь на расстоянии" : "Poezie: Dragoste la distanță", tag: "POETRY / PIANO", duration: "1:15", file: "/music/portfolio/Любовь на расстоянии.mp3" },
+    { id: 2, title: lang === 'ru' ? "Дерзкий бит на ДР Брату" : "Beat pentru Frate (La mulți ani)", tag: "TRAP/HIP-HOP", duration: "1:20", file: "/music/portfolio/Дерзкий бит на ДР Брату.mp3" },
+    { id: 3, title: lang === 'ru' ? "Стих: Прости меня" : "Poezie: Iartă-mă", tag: "POETRY / VIOLIN", duration: "2:00", file: "/music/portfolio/Iartă-mă.mp3" },
+    { id: 4, title: lang === 'ru' ? "Поздравление Боссу" : "Felicitare pentru Șef", tag: "JAZZ / LOUNGE", duration: "1:00", file: "/music/portfolio/Поздравление Боссу.mp3" },
+    { id: 5, title: lang === 'ru' ? "Гимн Любви (Свадьба)" : "Imnul Iubirii (Nuntă)", tag: "POP BALLAD", duration: "2:30", file: "/music/portfolio/Гимн Любви (Свадьба).mp3" },
+    { id: 6, title: lang === 'ru' ? "Стих: Маме с любовью" : "Poezie: Pentru Mama", tag: "POETRY / ACOUSTIC", duration: "1:45", file: "/music/portfolio/Стих Маме с любовью.mp3" },
+    { id: 7, title: lang === 'ru' ? "Дисс на Бывшего" : "Diss pentru Ex", tag: "DRILL / PHONK", duration: "1:40", file: "/music/portfolio/Дисс на Бывшего.mp3" },
+    { id: 8, title: lang === 'ru' ? "Утренний Вайб для Нее" : "Vibe de dimineață", tag: "LO-FI / CHILL", duration: "2:00", file: "/music/portfolio/Утренний Вайб для Нее.mp3" },
   ];
 
   const reviews = [
@@ -536,7 +617,8 @@ const FlowerBoxLanding = () => {
         .animate-marquee {
           display: flex;
           white-space: nowrap;
-          animation: marquee 15s linear infinite;
+          animation: marquee 5s linear infinite;
+          will-change: transform;
         }
         
         @keyframes pulse-ring {
@@ -553,6 +635,15 @@ const FlowerBoxLanding = () => {
           border-radius: 50%;
           z-index: -1;
           animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+        
+        .animate-shimmer {
+          animation: shimmer 2s ease-in-out infinite;
         }
 
         /* Paper Texture for Pushkin Block */
@@ -636,10 +727,17 @@ const FlowerBoxLanding = () => {
               <span className="tracking-wide">{currentT.btnMain}</span>
               <Zap className="w-5 h-5" />
             </button>
-            <div className="text-gray-400 text-xs md:text-sm text-center md:text-left flex items-center justify-center gap-2 bg-black/50 px-6 py-3 rounded-full border border-gray-800 w-full md:w-auto">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-              {currentT.readyTime}
-            </div>
+            <a 
+              href="#examples-section"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('examples-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="w-full md:w-auto bg-gradient-to-r from-purple-600 to-brand text-white font-bold py-4 md:py-5 px-8 transition-all flex items-center justify-center gap-2 border-2 border-purple-500/50 hover:border-purple-400 rounded-full text-base md:text-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.6)] hover:scale-105"
+            >
+              <Music className="w-5 h-5" />
+              <span className="tracking-wide">{currentT.btnExamples}</span>
+            </a>
           </div>
         </div>
       </header>
@@ -682,17 +780,17 @@ const FlowerBoxLanding = () => {
 
       {/* GUARANTEES (TRUST BLOCK) - NEW */}
       <section className="py-8 px-4">
-        <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 md:gap-4">
            {[
              {icon: Mic, text: currentT.g1},
              {icon: ShieldCheck, text: currentT.g2},
              {icon: Clock, text: currentT.g3},
            ].map((g, i) => (
-             <div key={i} className="flex items-center gap-4 bg-[#111] p-4 rounded-2xl border border-gray-800">
-                <div className="p-3 bg-brand/10 rounded-full text-brand">
-                  <g.icon size={24} />
+             <div key={i} className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 bg-[#111] p-3 md:p-4 rounded-xl md:rounded-2xl border border-gray-800">
+                <div className="p-2 md:p-3 bg-brand/10 rounded-full text-brand flex-shrink-0">
+                  <g.icon size={20} className="md:w-6 md:h-6" />
                 </div>
-                <span className="font-bold text-white text-sm">{g.text}</span>
+                <span className="font-bold text-white text-xs md:text-sm text-center md:text-left">{g.text}</span>
              </div>
            ))}
         </div>
@@ -733,7 +831,7 @@ const FlowerBoxLanding = () => {
       </section>
 
       {/* EXAMPLES SECTION */}
-      <section className="py-12 md:py-24 px-4 bg-[#0a0a0a]">
+      <section id="examples-section" className="py-12 md:py-24 px-4 bg-[#0a0a0a]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 md:mb-16">
             <h2 className="font-header text-3xl md:text-6xl mb-4">
@@ -744,25 +842,58 @@ const FlowerBoxLanding = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-2 gap-2 md:gap-6">
             {tracks.map((track) => (
-              <div key={track.id} className="bg-[#111] p-3 md:p-6 flex items-center gap-2 md:gap-5 border border-gray-800 border-brand-hover transition-all group cursor-pointer hover:neon-box rounded-xl md:rounded-[2rem]" onClick={() => togglePlay(track.id)}>
-                <button className="w-10 h-10 md:w-16 md:h-16 bg-brand flex items-center justify-center text-white flex-shrink-0 group-hover:bg-white group-hover:text-brand transition-colors shadow-[0_0_15px_rgba(216,27,96,0.4)] rounded-full">
+              <div 
+                key={track.id} 
+                className={`relative p-3 md:p-6 flex items-center gap-2 md:gap-5 transition-all duration-300 cursor-pointer rounded-xl md:rounded-[2rem] overflow-hidden group ${
+                  isPlaying === track.id 
+                    ? 'bg-gradient-to-r from-brand/20 via-brand/10 to-brand/20 border-2 border-brand shadow-[0_0_30px_rgba(216,27,96,0.4)]' 
+                    : 'bg-[#111] border border-gray-800 hover:border-brand/50 hover:bg-[#1a1a1a]'
+                }`}
+                onClick={() => togglePlay(track.id)}
+              >
+                {/* Animated gradient overlay on hover */}
+                {!isPlaying && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand/5 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-300"></div>
+                )}
+                
+                {/* Pulsing glow for playing track */}
+                {isPlaying === track.id && (
+                  <div className="absolute inset-0 bg-brand/10 animate-pulse"></div>
+                )}
+                
+                <button className={`relative z-10 w-10 h-10 md:w-16 md:h-16 flex items-center justify-center text-white flex-shrink-0 transition-all duration-300 rounded-full ${
+                  isPlaying === track.id
+                    ? 'bg-brand shadow-[0_0_25px_rgba(216,27,96,0.8)] scale-105'
+                    : 'bg-brand group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(216,27,96,0.6)] shadow-[0_0_15px_rgba(216,27,96,0.4)]'
+                }`}>
                   {isPlaying === track.id ? <Pause size={18} className="md:hidden" /> : <Play size={18} className="ml-0.5 md:hidden" />}
                   {isPlaying === track.id ? <Pause size={24} className="hidden md:block" /> : <Play size={24} className="ml-1 hidden md:block" />}
                 </button>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 relative z-10">
                   <div className="flex justify-between items-start mb-1 md:mb-2">
-                    <h4 className="font-bold text-white truncate pr-1 md:pr-2 text-xs md:text-lg group-hover:text-brand transition-colors">{track.title}</h4>
+                    <h4 className={`font-bold truncate pr-1 md:pr-2 text-xs md:text-lg transition-colors duration-300 ${
+                      isPlaying === track.id ? 'text-brand' : 'text-white group-hover:text-brand/80'
+                    }`}>{track.title}</h4>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-[8px] md:text-xs font-bold text-gray-500 bg-gray-900 px-1.5 md:px-3 py-0.5 md:py-1 uppercase rounded-full">{track.tag}</span>
                     <div className="h-3 md:h-4 flex items-end gap-[1px] md:gap-[3px]">
-                      {[...Array(12)].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className={`w-0.5 md:w-1.5 bg-brand transition-all duration-300 rounded-full ${isPlaying === track.id ? 'animate-pulse shadow-[0_0_5px_#D81B60]' : ''}`}
-                          style={{ height: isPlaying === track.id ? `${Math.random() * 100}%` : '20%' }}
-                        ></div>
-                      ))}
+                      {[...Array(12)].map((_, i) => {
+                        const isActive = isPlaying === track.id;
+                        const heights = equalizerHeights[track.id] || [];
+                        const barHeight = isActive && heights[i] ? heights[i] : (isActive ? 30 : 20);
+                        return (
+                          <div 
+                            key={i} 
+                            className={`w-0.5 md:w-1.5 bg-brand rounded-full transition-all duration-150 ${
+                              isActive ? 'shadow-[0_0_8px_#D81B60] opacity-100' : 'opacity-40'
+                            }`}
+                            style={{ 
+                              height: `${barHeight}%`
+                            }}
+                          ></div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
