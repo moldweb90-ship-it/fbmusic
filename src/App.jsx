@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Play, Pause, Music, Zap, Heart, Mic, QrCode, Send, Smartphone, Disc, X, Phone, MessageCircle, Globe, Feather, Star, ChevronDown, ChevronUp, CheckCircle, ShieldCheck, Clock, Smile, ArrowRight } from 'lucide-react';
 
 const FlowerBoxLanding = () => {
@@ -328,10 +328,10 @@ const FlowerBoxLanding = () => {
     setOpenFaq(openFaq === idx ? null : idx);
   }
 
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -422,141 +422,6 @@ const FlowerBoxLanding = () => {
     { q: lang === 'ru' ? "Как прослушать трек?" : "Cum ascult piesa?", a: lang === 'ru' ? "Мы генерируем QR-код, который печатается на красивой открытке. Получатель просто наводит камеру телефона." : "Generăm un cod QR pe o felicitare frumoasă. Destinatarul doar îndreaptă camera telefonului." },
   ];
 
-  // Reusable Form Component Content
-  const FormContent = () => (
-    <div className="space-y-4 md:space-y-6">
-      {/* SERVICE TYPE SELECTOR + PRICES */}
-      <div className="grid grid-cols-2 gap-4">
-        <button
-          type="button"
-          onClick={() => setFormData(prev => ({ ...prev, type: 'poem' }))}
-          className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'poem' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
-        >
-          <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">500 MDL</div>
-          <Feather size={28} className={formData.type === 'poem' ? 'text-brand' : 'group-hover:text-white'} />
-          <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typePoem}</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setFormData(prev => ({ ...prev, type: 'song' }))}
-          className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'song' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
-        >
-          <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">700 MDL</div>
-          <Music size={28} className={formData.type === 'song' ? 'text-brand' : 'group-hover:text-white'} />
-          <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typeSong}</span>
-        </button>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelName}</label>
-          <input 
-            type="text" name="name" required
-            className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelPhone}</label>
-          <input 
-            type="tel" name="phone" required
-            placeholder="+373..."
-            className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
-            onChange={handleInputChange}
-          />
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelContact}</label>
-          <input 
-            type="text" name="telegram" required
-            placeholder="@username"
-            className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelRecipient}</label>
-          <input 
-            type="text" name="recipient" required
-            className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
-            onChange={handleInputChange}
-          />
-        </div>
-      </div>
-      
-      {/* MOOD SELECTION */}
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2 flex items-center gap-2">
-            <Smile size={14} className="text-brand"/> {currentT.labelMood}
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {moodsList.map((mood) => (
-            <button
-              key={mood.id}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, mood: mood.id }))}
-              className={`px-4 py-2 text-xs font-bold border transition-all rounded-full ${formData.mood === mood.id ? 'bg-brand border-brand text-white shadow-[0_0_10px_rgba(216,27,96,0.4)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
-            >
-              {lang === 'ru' ? mood.ru : mood.ro}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* STYLE SELECTION */}
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelStyle}</label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-          {stylesList.map((style) => (
-            <button
-              key={style.id}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, style: style.id }))}
-              className={`p-3 text-xs font-bold border transition-all text-left truncate rounded-xl ${formData.style === style.id ? 'bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
-            >
-              {lang === 'ru' ? style.ru : style.ro}
-            </button>
-          ))}
-        </div>
-        
-        {/* Custom Style Input */}
-        {formData.style === 'Custom' && (
-           <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-             <input 
-                type="text" 
-                name="customStyle"
-                placeholder={currentT.labelCustomStyle}
-                className="w-full bg-gray-900 border border-brand p-3 text-white placeholder-gray-500 focus:outline-none rounded-xl text-sm"
-                onChange={handleInputChange}
-             />
-           </div>
-        )}
-      </div>
-
-      <div className="space-y-2 bg-gray-900/30 p-5 rounded-3xl border border-gray-800">
-        <label className="text-xs font-bold text-brand uppercase tracking-wider block pl-1 mb-2">{currentT.labelStory}</label>
-        <textarea 
-          name="story" rows="4" required
-          placeholder={currentT.placeholderStory}
-          className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand transition-colors resize-none rounded-2xl text-sm"
-          onChange={handleInputChange}
-        ></textarea>
-        <p className="text-[10px] text-gray-500 mt-2 text-right">* Мы сами придумаем рифму и текст, нужны только факты.</p>
-      </div>
-
-      <button 
-        type="submit"
-        className="w-full bg-brand bg-brand-hover text-white font-header text-xl py-4 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 uppercase tracking-wide neon-btn border border-brand rounded-full shadow-[0_0_20px_rgba(216,27,96,0.3)]"
-      >
-        {currentT.btnSubmit} <Send size={20} />
-      </button>
-      <p className="text-center text-gray-600 text-[10px]">{currentT.agree}</p>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden selection:bg-[#D81B60] selection:text-white">
@@ -1065,7 +930,144 @@ const FlowerBoxLanding = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-              <FormContent />
+              <div className="space-y-4 md:space-y-6">
+                {/* SERVICE TYPE SELECTOR + PRICES */}
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, type: 'poem' }))}
+                    className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'poem' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
+                  >
+                    <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">500 MDL</div>
+                    <Feather size={28} className={formData.type === 'poem' ? 'text-brand' : 'group-hover:text-white'} />
+                    <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typePoem}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, type: 'song' }))}
+                    className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'song' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
+                  >
+                    <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">700 MDL</div>
+                    <Music size={28} className={formData.type === 'song' ? 'text-brand' : 'group-hover:text-white'} />
+                    <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typeSong}</span>
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelName}</label>
+                    <input 
+                      type="text" name="name" required
+                      value={formData.name}
+                      className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelPhone}</label>
+                    <input 
+                      type="tel" name="phone" required
+                      value={formData.phone}
+                      placeholder="+373..."
+                      className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelContact}</label>
+                    <input 
+                      type="text" name="telegram" required
+                      value={formData.telegram}
+                      placeholder="@username"
+                      className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelRecipient}</label>
+                    <input 
+                      type="text" name="recipient" required
+                      value={formData.recipient}
+                      className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </div>
+                
+                {/* MOOD SELECTION */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2 flex items-center gap-2">
+                      <Smile size={14} className="text-brand"/> {currentT.labelMood}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {moodsList.map((mood) => (
+                      <button
+                        key={mood.id}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, mood: mood.id }))}
+                        className={`px-4 py-2 text-xs font-bold border transition-all rounded-full ${formData.mood === mood.id ? 'bg-brand border-brand text-white shadow-[0_0_10px_rgba(216,27,96,0.4)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
+                      >
+                        {lang === 'ru' ? mood.ru : mood.ro}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* STYLE SELECTION */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelStyle}</label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {stylesList.map((style) => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, style: style.id }))}
+                        className={`p-3 text-xs font-bold border transition-all text-left truncate rounded-xl ${formData.style === style.id ? 'bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
+                      >
+                        {lang === 'ru' ? style.ru : style.ro}
+                      </button>
+                    ))}
+                  </div>
+                  
+                  {/* Custom Style Input */}
+                  {formData.style === 'Custom' && (
+                     <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                       <input 
+                          type="text" 
+                          name="customStyle"
+                          value={formData.customStyle}
+                          placeholder={currentT.labelCustomStyle}
+                          className="w-full bg-gray-900 border border-brand p-3 text-white placeholder-gray-500 focus:outline-none rounded-xl text-sm"
+                          onChange={handleInputChange}
+                       />
+                     </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 bg-gray-900/30 p-5 rounded-3xl border border-gray-800">
+                  <label className="text-xs font-bold text-brand uppercase tracking-wider block pl-1 mb-2">{currentT.labelStory}</label>
+                  <textarea 
+                    name="story" rows="4" required
+                    value={formData.story}
+                    placeholder={currentT.placeholderStory}
+                    className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand transition-colors resize-none rounded-2xl text-sm"
+                    onChange={handleInputChange}
+                  ></textarea>
+                  <p className="text-[10px] text-gray-500 mt-2 text-right">* Мы сами придумаем рифму и текст, нужны только факты.</p>
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full bg-brand bg-brand-hover text-white font-header text-xl py-4 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 uppercase tracking-wide neon-btn border border-brand rounded-full shadow-[0_0_20px_rgba(216,27,96,0.3)]"
+                >
+                  {currentT.btnSubmit} <Send size={20} />
+                </button>
+                <p className="text-center text-gray-600 text-[10px]">{currentT.agree}</p>
+              </div>
             </form>
           </div>
         </div>
@@ -1149,7 +1151,144 @@ const FlowerBoxLanding = () => {
               </div>
 
               <form onSubmit={handleSubmit}>
-                <FormContent />
+                <div className="space-y-4 md:space-y-6">
+                  {/* SERVICE TYPE SELECTOR + PRICES */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, type: 'poem' }))}
+                      className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'poem' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
+                    >
+                      <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">500 MDL</div>
+                      <Feather size={28} className={formData.type === 'poem' ? 'text-brand' : 'group-hover:text-white'} />
+                      <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typePoem}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, type: 'song' }))}
+                      className={`relative p-4 md:p-5 rounded-3xl border flex flex-col items-center gap-2 transition-all group overflow-hidden ${formData.type === 'song' ? 'bg-brand/20 border-brand text-white shadow-[0_0_15px_rgba(216,27,96,0.3)]' : 'bg-black border-gray-700 text-gray-500 hover:border-gray-500'}`}
+                    >
+                      <div className="absolute top-0 right-0 bg-brand text-white text-[10px] font-bold px-3 py-1 rounded-bl-2xl">700 MDL</div>
+                      <Music size={28} className={formData.type === 'song' ? 'text-brand' : 'group-hover:text-white'} />
+                      <span className="text-xs font-bold uppercase text-center mt-1">{currentT.typeSong}</span>
+                    </button>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelName}</label>
+                      <input 
+                        type="text" name="name" required
+                        value={formData.name}
+                        className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelPhone}</label>
+                      <input 
+                        type="tel" name="phone" required
+                        value={formData.phone}
+                        placeholder="+373..."
+                        className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelContact}</label>
+                      <input 
+                        type="text" name="telegram" required
+                        value={formData.telegram}
+                        placeholder="@username"
+                        className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelRecipient}</label>
+                      <input 
+                        type="text" name="recipient" required
+                        value={formData.recipient}
+                        className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-600 focus:outline-none focus:border-brand transition-colors rounded-2xl"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* MOOD SELECTION */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2 flex items-center gap-2">
+                        <Smile size={14} className="text-brand"/> {currentT.labelMood}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {moodsList.map((mood) => (
+                        <button
+                          key={mood.id}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, mood: mood.id }))}
+                          className={`px-4 py-2 text-xs font-bold border transition-all rounded-full ${formData.mood === mood.id ? 'bg-brand border-brand text-white shadow-[0_0_10px_rgba(216,27,96,0.4)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
+                        >
+                          {lang === 'ru' ? mood.ru : mood.ro}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* STYLE SELECTION */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block pl-2">{currentT.labelStyle}</label>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {stylesList.map((style) => (
+                        <button
+                          key={style.id}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, style: style.id }))}
+                          className={`p-3 text-xs font-bold border transition-all text-left truncate rounded-xl ${formData.style === style.id ? 'bg-white text-black border-white shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'bg-transparent border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'}`}
+                        >
+                          {lang === 'ru' ? style.ru : style.ro}
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Custom Style Input */}
+                    {formData.style === 'Custom' && (
+                       <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                         <input 
+                            type="text" 
+                            name="customStyle"
+                            value={formData.customStyle}
+                            placeholder={currentT.labelCustomStyle}
+                            className="w-full bg-gray-900 border border-brand p-3 text-white placeholder-gray-500 focus:outline-none rounded-xl text-sm"
+                            onChange={handleInputChange}
+                         />
+                       </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 bg-gray-900/30 p-5 rounded-3xl border border-gray-800">
+                    <label className="text-xs font-bold text-brand uppercase tracking-wider block pl-1 mb-2">{currentT.labelStory}</label>
+                    <textarea 
+                      name="story" rows="4" required
+                      value={formData.story}
+                      placeholder={currentT.placeholderStory}
+                      className="w-full bg-black border border-gray-700 p-4 text-white placeholder-gray-500 focus:outline-none focus:border-brand transition-colors resize-none rounded-2xl text-sm"
+                      onChange={handleInputChange}
+                    ></textarea>
+                    <p className="text-[10px] text-gray-500 mt-2 text-right">* Мы сами придумаем рифму и текст, нужны только факты.</p>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full bg-brand bg-brand-hover text-white font-header text-xl py-4 hover:-translate-y-1 transition-all flex items-center justify-center gap-3 uppercase tracking-wide neon-btn border border-brand rounded-full shadow-[0_0_20px_rgba(216,27,96,0.3)]"
+                  >
+                    {currentT.btnSubmit} <Send size={20} />
+                  </button>
+                  <p className="text-center text-gray-600 text-[10px]">{currentT.agree}</p>
+                </div>
               </form>
             </div>
           </div>
