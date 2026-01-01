@@ -194,14 +194,14 @@ const FlowerBoxLanding = () => {
       btnSubmit: "ОТПРАВИТЬ ЗАЯВКУ",
       agree: "Нажимая кнопку, ты соглашаешься на обработку данных.",
       modalTitle: "ЗАЯВКА УЛЕТЕЛА!",
-      modalDesc: "Мы приняли твою заявку. Скоро мафия выйдет на связь в Telegram для уточнения деталей.",
+      modalDesc: "Мы приняли твою заявку. Скоро Валерий Меладзе выйдет на связь в Telegram для уточнения деталей.",
       modalBtn: "ПОНЯЛ, ЖДУ",
       footerCity: "Кишинев, Молдова",
       footerDept: "Music & Poetry Dept.",
       contactBtn: "Связаться в Telegram",
       cardLookTitle: "КАК ЭТО",
       cardLookTitle2: "ВЫГЛЯДИТ?",
-      cardLookDesc: "Премиум открытка с тиснением в каждом букете",
+      cardLookDesc: "Персональная премиум открытка в каждом букете",
       cardFeature1: "QR-код с вашим треком",
       cardFeature2: "Плотный дизайнерский картон",
       cardFeature3: "Стильный черный конверт",
@@ -281,7 +281,7 @@ const FlowerBoxLanding = () => {
       contactBtn: "Scrie-ne pe Telegram",
       cardLookTitle: "CUM ARATĂ",
       cardLookTitle2: "CARDUL?",
-      cardLookDesc: "Felicitare premium în fiecare buchet",
+      cardLookDesc: "Felicitare premium personalizată în fiecare buchet",
       cardFeature1: "Cod QR cu piesa ta",
       cardFeature2: "Carton premium de design",
       cardFeature3: "Plic negru elegant",
@@ -293,6 +293,63 @@ const FlowerBoxLanding = () => {
   };
 
   const currentT = t[lang];
+
+  // SEO Meta tags update when language changes
+  useEffect(() => {
+    const isRu = lang === 'ru';
+    
+    // Update document title
+    document.title = isRu 
+      ? 'Flower Box - Персональная музыка и стихи к букетам | Кишинев'
+      : 'Flower Box - Muzică Personalizată și Poezii pentru Buchete | Chișinău';
+    
+    // Update html lang attribute
+    document.documentElement.lang = isRu ? 'ru' : 'ro';
+    
+    // Update or create meta description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', isRu
+      ? 'Персональная музыка и стихи к букетам цветов в Кишиневе. Закажите уникальный трек или музыкальный стих за 1-2 часа. QR-код в каждой открытке. Цены от 500 MDL.'
+      : 'Muzică personalizată și poezii pentru buchete de flori în Chișinău. Comandă piesa sau poezia muzicală unică în 1-2 ore. Cod QR în fiecare felicitare. Prețuri de la 500 MDL.');
+    
+    // Update or create meta keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', isRu
+      ? 'персональная музыка, стихи к букетам, музыка к цветам, Кишинев, Молдова, QR код, заказ песни, персональный трек, музыкальный стих, цветы с музыкой, открытка с QR кодом, Flower Box'
+      : 'muzică personalizată, poezii pentru buchete, muzică pentru flori, Chișinău, Moldova, cod QR, comandă piesă, piesă personalizată, poezie muzicală, flori cu muzică, felicitare cu cod QR, Flower Box');
+    
+    // Update or create Open Graph title
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', isRu
+      ? 'Flower Box - Персональная музыка и стихи к букетам | Кишинев'
+      : 'Flower Box - Muzică Personalizată și Poezii pentru Buchete | Chișinău');
+    
+    // Update or create Open Graph description
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (!ogDescription) {
+      ogDescription = document.createElement('meta');
+      ogDescription.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDescription);
+    }
+    ogDescription.setAttribute('content', isRu
+      ? 'Персональная музыка и стихи к букетам цветов в Кишиневе. Закажите уникальный трек или музыкальный стих за 1-2 часа.'
+      : 'Muzică personalizată și poezii pentru buchete de flori în Chișinău. Comandă piesa sau poezia muzicală unică în 1-2 ore.');
+  }, [lang]);
 
   // Logic
   const togglePlay = (id) => {
