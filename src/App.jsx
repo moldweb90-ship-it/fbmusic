@@ -16,7 +16,7 @@ const FlowerBoxLanding = () => {
   const [equalizerHeights, setEqualizerHeights] = useState({}); // For animated equalizer bars
   const pushkinAudioRef = useRef(null); // Audio ref for Pushkin section
   const magicAudioRef = useRef(null); // Audio ref for Magic section
-  const portfolioAudioRef = useRef(null); // Audio ref for portfolio tracks
+  const portfolioAudioRefs = useRef({}); // Map of audio refs for portfolio tracks (by track id)
 
   // Detect scroll for floating button appearance
   useEffect(() => {
@@ -119,30 +119,35 @@ const FlowerBoxLanding = () => {
       if (pushkinAudioRef.current) pushkinAudioRef.current.pause();
       if (magicAudioRef.current) magicAudioRef.current.pause();
 
-      // Clean up previous audio if exists
-      if (portfolioAudioRef.current) {
-        portfolioAudioRef.current.pause();
-        portfolioAudioRef.current = null;
+      // Stop all other portfolio tracks
+      Object.values(portfolioAudioRefs.current).forEach(audio => {
+        if (audio && !audio.paused) {
+          audio.pause();
+        }
+      });
+
+      // Get or create audio for this track
+      let audio = portfolioAudioRefs.current[isPlaying];
+      if (!audio) {
+        audio = new Audio(trackFile);
+        audio.preload = 'auto';
+        portfolioAudioRefs.current[isPlaying] = audio;
+        
+        const handleEnded = () => {
+          setIsPlaying(null);
+          setEqualizerHeights({});
+        };
+        audio.addEventListener('ended', handleEnded);
       }
 
-      // Create and play new audio
-      portfolioAudioRef.current = new Audio(trackFile);
-      portfolioAudioRef.current.preload = 'auto';
-      
-      const handleEnded = () => {
-        setIsPlaying(null);
-        setEqualizerHeights({});
-        portfolioAudioRef.current = null;
-      };
-
-      portfolioAudioRef.current.addEventListener('ended', handleEnded);
-      portfolioAudioRef.current.play().catch(error => {
+      // Play audio (will continue from current time if paused)
+      audio.play().catch(error => {
         console.error('Error playing portfolio audio:', error);
       });
 
       // Animate equalizer bars
       const interval = setInterval(() => {
-        if (portfolioAudioRef.current && !portfolioAudioRef.current.paused) {
+        if (audio && !audio.paused) {
           setEqualizerHeights(prev => ({
             ...prev,
             [isPlaying]: Array.from({ length: 12 }, () => Math.random() * 70 + 30)
@@ -152,19 +157,15 @@ const FlowerBoxLanding = () => {
 
       return () => {
         clearInterval(interval);
-        if (portfolioAudioRef.current) {
-          portfolioAudioRef.current.removeEventListener('ended', handleEnded);
-          portfolioAudioRef.current.pause();
-          portfolioAudioRef.current = null;
-        }
       };
     } else {
-      // Stop audio when isPlaying is null
+      // Stop all audio when isPlaying is null
       setEqualizerHeights({});
-      if (portfolioAudioRef.current) {
-        portfolioAudioRef.current.pause();
-        portfolioAudioRef.current = null;
-      }
+      Object.values(portfolioAudioRefs.current).forEach(audio => {
+        if (audio && !audio.paused) {
+          audio.pause();
+        }
+      });
     }
   }, [isPlaying]);
 
@@ -429,10 +430,10 @@ const FlowerBoxLanding = () => {
   // Logic
   const togglePlay = (id) => {
     if (isPlaying === id) {
-      // Stop current track
-      if (portfolioAudioRef.current) {
-        portfolioAudioRef.current.pause();
-        portfolioAudioRef.current = null;
+      // Pause current track (don't remove audio object)
+      const audio = portfolioAudioRefs.current[id];
+      if (audio) {
+        audio.pause();
       }
       setEqualizerHeights({});
       setIsPlaying(null);
